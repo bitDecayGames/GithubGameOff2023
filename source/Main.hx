@@ -72,7 +72,9 @@ class Main extends Sprite {
 
 		DebugDraw.init(Type.allEnums(DebugLayers));
 
+		#if debug
 		DebugDraw.enabled = true;
+		#end
 
 		configureLogging();
 
