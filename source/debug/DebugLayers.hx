@@ -4,6 +4,6 @@ package debug;
 // as needed
 enum DebugLayers {
 	GENERAL;
-	RAYCAST;
+	PUZZLE;
 	AUDIO;
 }

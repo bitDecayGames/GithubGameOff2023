@@ -45,7 +45,7 @@ class MatchPiece extends FlxSprite {
 
 		y = (cy + renderYR) * MatchBoard.CELL_SIZE;
 
-		DebugDraw.ME.drawWorldCircle(x + MatchBoard.CELL_SIZE / 2, y + MatchBoard.CELL_SIZE / 2, MatchBoard.CELL_SIZE / 2);
+		DebugDraw.ME.drawWorldCircle(x + MatchBoard.CELL_SIZE / 2, y + MatchBoard.CELL_SIZE / 2, MatchBoard.CELL_SIZE / 2, PUZZLE, settled ? FlxColor.GRAY : FlxColor.MAGENTA);
 
 		super.update(delta);
 	}
@@ -81,13 +81,9 @@ class MatchPiece extends FlxSprite {
 		if (yr > 0.5 && parent.hasCollision(cx, cy + 1)) {
 			yr = 0;
 			settled = true;
-			return true;
-		} else {
-			return false;
+		} else if (!parent.hasCollision(cx, cy + 1)) {
+			settled = false;
 		}
-		// 	piece.yr = 0;
-		// 	piece.settled = true;
-		// piece.yr = 0;
-		// piece.settled = true;
+		return settled;
 	}
 }

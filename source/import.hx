@@ -7,6 +7,8 @@ import FmodConstants.FmodSongs;
 // Give easy access to logging
 import bitdecay.flixel.system.QuickLog;
 
+import debug.DebugLayers;
+
 // Various extensions
 using bitdecay.flixel.extensions.FlxCameraExt;
 using bitdecay.flixel.extensions.FlxObjectExt;

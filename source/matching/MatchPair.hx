@@ -6,6 +6,8 @@ import flixel.math.FlxMath;
 
 // Pairs are always anchored around piece 'a'
 class MatchPair {
+	private static var LEFT_RIGHT_GIVE = 0.3;
+
 	public var a:MatchPiece;
 	public var b:MatchPiece;
 
@@ -157,7 +159,25 @@ class MatchPair {
 		b.updateCoords();
 	}
 
-	public function checkDone() {
-		return a.checkSettled() || b.checkSettled();
+	public function moveLeft():Bool {
+		var acy = a.cy + (a.yr > LEFT_RIGHT_GIVE ? 1 : 0);
+		var bcy = b.cy + (b.yr > LEFT_RIGHT_GIVE ? 1 : 0);
+		if (!a.parent.hasCollision(left - 1, acy) && !b.parent.hasCollision(left - 1, bcy)) {
+			adjust(-1, 0);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public function moveRight():Bool {
+		var acy = a.cy + (a.yr > LEFT_RIGHT_GIVE ? 1 : 0);
+		var bcy = b.cy + (b.yr > LEFT_RIGHT_GIVE ? 1 : 0);
+		if (!a.parent.hasCollision(right + 1, acy) && !b.parent.hasCollision(right + 1, bcy)) {
+			adjust(1, 0);
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

@@ -7,14 +7,17 @@ import input.SimpleController;
 import flixel.FlxSprite;
 
 class MatchBoard extends FlxSprite {
+	private static var FAST_FALL_MOD = 5.0;
+
 	private var boardWidth = 6;
 	private var boardHeight = 12;
 	public static var CELL_SIZE = 16;
 	var board = new Array<Array<MatchPiece>>();
 
 	var activePair:MatchPair;
+	var fullySettled:Bool = false;
 
-	var gravity = 2.0;
+	var gravity = 1.0;
 
 	public function new() {
 		super();
@@ -38,18 +41,28 @@ class MatchBoard extends FlxSprite {
 
 		if (activePair != null) {
 			if (SimpleController.just_pressed(LEFT)) {
-				if (activePair.left > 0) {
-					activePair.adjust(-1, 0);
+				if (activePair.moveLeft()) {
+					// great!
 				} else {
-					// bump into wall
+					// can't move
 				}
+				// if (activePair.left > 0) {
+				// 	activePair.adjust(-1, 0);
+				// } else {
+				// 	// bump into wall
+				// }
 			}
 			if (SimpleController.just_pressed(RIGHT)) {
-				if (activePair.right < boardWidth - 1) {
-					activePair.adjust(1, 0);
+				if (activePair.moveRight()) {
+					// great!
 				} else {
-					// bump into wall
+					// can't move
 				}
+				// if (activePair.right < boardWidth - 1) {
+				// 	activePair.adjust(1, 0);
+				// } else {
+				// 	// bump into wall
+				// }
 			}
 			if (SimpleController.just_pressed(A)) {
 				if (activePair.spin()) {
@@ -59,16 +72,21 @@ class MatchBoard extends FlxSprite {
 				}
 			}
 
-			activePair.adjust(0, gravity * elapsed);
+			activePair.adjust(0, gravity * elapsed * (SimpleController.pressed(DOWN) ? FAST_FALL_MOD : 1));
 
-			if (activePair.checkDone()) {
-				board[activePair.a.cx][activePair.a.cy] = activePair.a;
-				board[activePair.b.cx][activePair.b.cy] = activePair.b;
+			if (checkPairControlDone()) {
+				// trim the remainder to avoid jitters when breaking the pieces apart
+				activePair.a.yr = 0;
+				activePair.b.yr = 0;
+
 				activePair.finish();
 				activePair = null;
 			}
+		} else if (fullySettled) {
+			sendPiece();
 		}
 
+		var settleCheck = true;
 		for (column in board) {
 			for (y in 0...column.length) {
 				var cell = column.length - 1 - y;
@@ -76,6 +94,8 @@ class MatchBoard extends FlxSprite {
 				if (piece == null) {
 					continue;
 				}
+
+				piece.checkSettled();
 				if (!piece.settled) {
 					piece.yr += gravity * elapsed;
 					if (!piece.checkSettled()) {
@@ -83,11 +103,39 @@ class MatchBoard extends FlxSprite {
 						board[piece.cx][piece.cy] = null;
 						piece.updateCoords();
 						board[piece.cx][piece.cy] = piece;
+						settleCheck = false;
 					}
 				}
 			}
 		}
+		fullySettled = settleCheck;
 	}
+	function checkPairControlDone() {
+		var a = activePair.a;
+		var b = activePair.b;
+		// Check bottom-up so we proprogate the settled-ness properly
+		if (b.cy > a.cy) {
+			if (b.checkSettled()) {
+				board[b.cx][b.cy] = b;
+				board[a.cx][a.cy] = a;
+			}
+			if (a.checkSettled()) {
+				board[a.cx][a.cy] = a;
+				board[b.cx][b.cy] = b;
+			}
+		} else {
+			if (a.checkSettled()) {
+				board[a.cx][a.cy] = a;
+				board[b.cx][b.cy] = b;
+			}
+			if (b.checkSettled()) {
+				board[a.cx][a.cy] = a;
+				board[b.cx][b.cy] = b;
+			}
+		}
+		return a.settled || b.settled;
+	}
+	
 
 	public function hasCollision(cx:Int, cy:Int):Bool {
 		if (cx < 0 || cx >= boardWidth) {
