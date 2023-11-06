@@ -28,6 +28,8 @@ class MatchBoard extends FlxSprite {
 
 	var chains:Array<ChainNode> = [];
 
+	var comboCount = 0;
+
 	var gravity = 1.0;
 
 	public function new() {
@@ -199,10 +201,7 @@ class MatchBoard extends FlxSprite {
 			piece.yr = 0;
 			piece.yVel = 0;
 			piece.settled = true;
-			// piece.updateCoords();
-			// board[piece.cx][piece.cy] = piece;
 		} else if (!hasCollision(piece.cx, piece.cy + 1)) {
-			// board[piece.cx][piece.cy] = null;
 			piece.settled = false;
 			var y = piece.cy;
 			while (y > 0) {
@@ -239,12 +238,39 @@ class MatchBoard extends FlxSprite {
 			}
 		}
 
+		var breaks:Array<ChainNode> = [];
 		for (chain in chains) {
 			if (chain.count() >= 4) {
+				breaks.push(chain);
+			}
+		}
+
+		if (breaks.length > 0) {
+			comboCount++;
+			score(breaks);
+			for (chain in breaks) {
 				clearChain(chain);
 				chains.remove(chain); // does this break the iterator?
 			}
+			QuickLog.notice('Combo: $comboCount');
+		} else {
+			// reset combo counter if nothing breaks
+			if (comboCount != 0) {
+				QuickLog.notice('---Combo reset---');
+			}
+			comboCount = 0;
 		}
+	}
+
+	function score(breaks:Array<ChainNode>) {
+		var baseScore = 0;
+		for (chain in breaks) {
+			baseScore += Scoring.baseScore(chain.count());
+		}
+		var comboMult = Scoring.comboScalar(comboCount);
+		var multiBreak = Scoring.multiBreakScalar(breaks.length);
+		var finalScore = baseScore * comboMult * multiBreak;
+		QuickLog.notice('  Points: $finalScore ($baseScore * $comboMult * $multiBreak)');
 	}
 
 	function findConnected(chain:ChainNode = null, visited:Array<MatchPiece>):ChainNode {
@@ -312,6 +338,8 @@ class MatchBoard extends FlxSprite {
 			return true;
 		}
 
+		// falling pieces aren't considered collidable. This is useful for having a column of blocks
+		// fall together if a block near the bottom breaks
 		return board[cx][cy] != null && board[cx][cy].settled;
 	}
 }
