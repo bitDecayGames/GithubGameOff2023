@@ -88,6 +88,7 @@ class MatchPiece extends FlxSprite {
 	public function checkSettled():Bool {
 		if (yr > 0.5 && parent.hasCollision(cx, cy + 1)) {
 			yr = 0;
+			yVel = 0;
 			settled = true;
 		} else if (!parent.hasCollision(cx, cy + 1)) {
 			settled = false;

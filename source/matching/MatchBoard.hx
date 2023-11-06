@@ -1,5 +1,6 @@
 package matching;
 
+import matching.Chain.ChainNode;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
 import bitdecay.flixel.debug.DebugDraw;
@@ -16,6 +17,8 @@ class MatchBoard extends FlxSprite {
 
 	var activePair:MatchPair;
 	var fullySettled:Bool = false;
+
+	var breaks:Array<ChainNode> = [];
 
 	var gravity = 1.0;
 
@@ -81,21 +84,25 @@ class MatchBoard extends FlxSprite {
 
 		checkSettled();
 
-		#if debug
-		for (group in breaks) {
-			// DebugDraw.ME.
-			var a:MatchPiece;
-			var b:MatchPiece;
-			for (i in 1...group.length) {
-				a = group[i-1];
-				b = group[i];
-				DebugDraw.ME.drawWorldCircle((a.cx + .5) * CELL_SIZE, (a.cy + .5) * CELL_SIZE, 5);
-				DebugDraw.ME.drawWorldCircle((b.cx + .5) * CELL_SIZE, (b.cy + .5) * CELL_SIZE, 5);
-				DebugDraw.ME.drawWorldLine((a.cx + .5) * CELL_SIZE, (a.cy + .5) * CELL_SIZE, (b.cx + .5) * CELL_SIZE, (b.cy + .5) * CELL_SIZE);
+		for (chain in breaks) {
+			#if debug
+			chain.debugDraw();
+			#end
+
+			if (chain.count() >= 4) {
+				clearChain(chain);
+				breaks.remove(chain); // does this break the iterator?
 			}
 		}
-		#end
 	}
+	function clearChain(chain:ChainNode) {
+		// TODO: need to do animations / wait for animation to finish before continuing game
+		chain.forEachNode((piece) -> {
+			board[piece.cx][piece.cy] = null;
+			FlxG.state.remove(piece);
+		});
+	}
+	
 
 	function checkSettled() {
 		var settleCheck = true;
@@ -129,8 +136,6 @@ class MatchBoard extends FlxSprite {
 		fullySettled = settleCheck;
 	}
 
-	var breaks:Array<Array<MatchPiece>> = [];
-
 	function checkBreaks() {
 		breaks = [];
 		var checked:Array<MatchPiece> = [];
@@ -139,11 +144,10 @@ class MatchBoard extends FlxSprite {
 				var piece = column[y];
 				if (piece != null && !checked.contains(piece)) {
 					// find all adjacent pieces that match recursively
-					var chain = findConnected(piece, [], []);
-					for (p in chain) {
-						checked.push(p);
-					}
-					if (chain.length > 1) {
+					var chain = findConnected(new ChainNode(piece), []);
+					chain.addPiecesTo(checked);
+
+					if (chain.count() > 1) {
 						breaks.push(chain);
 					}
 				}
@@ -151,21 +155,23 @@ class MatchBoard extends FlxSprite {
 		}
 	}
 
-	function findConnected(piece, chain:Array<MatchPiece> = null, visited:Array<MatchPiece>):Array<MatchPiece> {
-		if (chain.length == 0) {
-			chain.push(piece);
-		}
+	function findConnected(chain:ChainNode = null, visited:Array<MatchPiece>):ChainNode {
+		visited.push(chain.piece);
 
-		var left = getBoardPiece(piece.cx - 1, piece.cy);
-		var right = getBoardPiece(piece.cx + 1, piece.cy);
-		var up = getBoardPiece(piece.cx, piece.cy - 1);
-		var down = getBoardPiece(piece.cx, piece.cy + 1);
+		// our 4 adjacent pieces
+		var adjacent = [
+			getBoardPiece(chain.piece.cx, chain.piece.cy - 1),
+			getBoardPiece(chain.piece.cx, chain.piece.cy + 1),
+			getBoardPiece(chain.piece.cx - 1, chain.piece.cy),
+			getBoardPiece(chain.piece.cx + 1, chain.piece.cy),
+		];
 
-		if (left != null && !visited.contains(left)) {
-			visited.push(left);
-			if (left.type == piece.type) {
-				chain.push(left);
-				findConnected(left, chain, visited);
+		for (adj in adjacent) {
+			if (adj != null && !visited.contains(adj)) {
+				if (adj.type == chain.piece.type) {
+					var next = chain.ConnectTo(adj);
+					findConnected(next, visited);
+				}
 			}
 		}
 
@@ -173,7 +179,7 @@ class MatchBoard extends FlxSprite {
 	}
 
 	function getBoardPiece(cx:Int, cy:Int):MatchPiece {
-		if (cx < 0 || cx > board.length || cy < 0 || cy >= board[0].length) {
+		if (cx < 0 || cx >= board.length || cy < 0 || cy >= board[0].length) {
 			return null;
 		}
 		
