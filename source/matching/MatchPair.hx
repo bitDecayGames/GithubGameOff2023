@@ -38,18 +38,6 @@ class MatchPair {
 		return FlxMath.maxInt(a.cx, b.cx);
 	}
 
-	public function shift(dir:Cardinal) {
-		switch(dir) {
-			case E:
-				a.cx--;
-				b.cx--;
-			case W:
-				a.cx++;
-				b.cx++;
-			default:
-		}
-	}
-
 	// clockwise spin
 	public function spin():Bool {
 		// TODO: Animations for this? Tweens? Pause game while spin happens?
@@ -103,7 +91,7 @@ class MatchPair {
 					// standard spin
 					b.cx = a.cx - 1;
 					b.cy = a.cy;
-				} else if (!a.parent.hasCollision(a.cx - 1, a.cy)) {
+				} else if (!a.parent.hasCollision(a.cx + 1, a.cy)) {
 					// against a blocker, a moves away from blocker, b takes its place
 					b.cx = a.cx;
 					b.cy = a.cy;
@@ -147,7 +135,6 @@ class MatchPair {
 		a.sibling = null;
 		b.sibling = null;
 	}
-	
 
 	public function adjust(x:Float, y:Float) {
 		a.xr += x;

@@ -85,14 +85,15 @@ class MatchPiece extends FlxSprite {
 		return changed;
 	}
 
-	public function checkSettled():Bool {
-		if (yr > 0.5 && parent.hasCollision(cx, cy + 1)) {
-			yr = 0;
-			yVel = 0;
-			settled = true;
-		} else if (!parent.hasCollision(cx, cy + 1)) {
-			settled = false;
-		}
-		return settled;
-	}
+	// public function checkSettled():Bool {
+	// 	if (yr > 0.5 && parent.hasCollision(cx, cy + 1)) {
+	// 		yr = 0;
+	// 		yVel = 0;
+	// 		settled = true;
+	// 	} else if (!parent.hasCollision(cx, cy + 1)) {
+	// 		settled = false;
+	// 		parent.unsettleUp(cx, cy);
+	// 	}
+	// 	return settled;
+	// }
 }
