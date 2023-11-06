@@ -1,5 +1,6 @@
 package matching;
 
+import flixel.FlxG;
 import bitdecay.flixel.debug.DebugDraw;
 import flixel.util.FlxColor;
 import flixel.FlxSprite;
@@ -14,22 +15,29 @@ class MatchPiece extends FlxSprite {
 	/** Sub-grid Y coordinate (from 0.0 to 1.0) **/
 	public var yr = 1.0;
 
+	public var yVel = 0.0;
+
 	public var settled = false;
 
 	public var parent:MatchBoard;
 
 	public var sibling:MatchPiece = null;
 
+	public var type:PieceType;
+
 	public function new(board:MatchBoard) {
 		super();
 
 		parent = board;
+		this.type = PieceType.random();
 
-		makeGraphic(16, 16, FlxColor.YELLOW);
+		makeGraphic(16, 16, type);
 		this.centerOrigin();
 	}
 
 	override public function update(delta:Float) {
+
+		yr += yVel * delta;
 		
 		// x is adjusted so that pieces are centered in the grid cell at 0.5
 		x = (cx + xr - .5) * MatchBoard.CELL_SIZE;

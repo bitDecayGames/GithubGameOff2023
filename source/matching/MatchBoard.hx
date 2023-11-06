@@ -46,11 +46,6 @@ class MatchBoard extends FlxSprite {
 				} else {
 					// can't move
 				}
-				// if (activePair.left > 0) {
-				// 	activePair.adjust(-1, 0);
-				// } else {
-				// 	// bump into wall
-				// }
 			}
 			if (SimpleController.just_pressed(RIGHT)) {
 				if (activePair.moveRight()) {
@@ -58,11 +53,6 @@ class MatchBoard extends FlxSprite {
 				} else {
 					// can't move
 				}
-				// if (activePair.right < boardWidth - 1) {
-				// 	activePair.adjust(1, 0);
-				// } else {
-				// 	// bump into wall
-				// }
 			}
 			if (SimpleController.just_pressed(A)) {
 				if (activePair.spin()) {
@@ -81,11 +71,33 @@ class MatchBoard extends FlxSprite {
 
 				activePair.finish();
 				activePair = null;
+
+				// reset our settled flag to ensure breaks are checked
+				fullySettled = false;
 			}
 		} else if (fullySettled) {
 			sendPiece();
 		}
 
+		checkSettled();
+
+		#if debug
+		for (group in breaks) {
+			// DebugDraw.ME.
+			var a:MatchPiece;
+			var b:MatchPiece;
+			for (i in 1...group.length) {
+				a = group[i-1];
+				b = group[i];
+				DebugDraw.ME.drawWorldCircle((a.cx + .5) * CELL_SIZE, (a.cy + .5) * CELL_SIZE, 5);
+				DebugDraw.ME.drawWorldCircle((b.cx + .5) * CELL_SIZE, (b.cy + .5) * CELL_SIZE, 5);
+				DebugDraw.ME.drawWorldLine((a.cx + .5) * CELL_SIZE, (a.cy + .5) * CELL_SIZE, (b.cx + .5) * CELL_SIZE, (b.cy + .5) * CELL_SIZE);
+			}
+		}
+		#end
+	}
+
+	function checkSettled() {
 		var settleCheck = true;
 		for (column in board) {
 			for (y in 0...column.length) {
@@ -97,7 +109,7 @@ class MatchBoard extends FlxSprite {
 
 				piece.checkSettled();
 				if (!piece.settled) {
-					piece.yr += gravity * elapsed;
+					piece.yVel += gravity;
 					if (!piece.checkSettled()) {
 						// XXX: This just feels like it has potential to be buggy
 						board[piece.cx][piece.cy] = null;
@@ -108,8 +120,66 @@ class MatchBoard extends FlxSprite {
 				}
 			}
 		}
+
+		if (!fullySettled && settleCheck) {
+			// TODO: Check for breaks and do all animations
+			checkBreaks();
+		}
+
 		fullySettled = settleCheck;
 	}
+
+	var breaks:Array<Array<MatchPiece>> = [];
+
+	function checkBreaks() {
+		breaks = [];
+		var checked:Array<MatchPiece> = [];
+		for (column in board) {
+			for (y in 0...column.length) {
+				var piece = column[y];
+				if (piece != null && !checked.contains(piece)) {
+					// find all adjacent pieces that match recursively
+					var chain = findConnected(piece, [], []);
+					for (p in chain) {
+						checked.push(p);
+					}
+					if (chain.length > 1) {
+						breaks.push(chain);
+					}
+				}
+			}
+		}
+	}
+
+	function findConnected(piece, chain:Array<MatchPiece> = null, visited:Array<MatchPiece>):Array<MatchPiece> {
+		if (chain.length == 0) {
+			chain.push(piece);
+		}
+
+		var left = getBoardPiece(piece.cx - 1, piece.cy);
+		var right = getBoardPiece(piece.cx + 1, piece.cy);
+		var up = getBoardPiece(piece.cx, piece.cy - 1);
+		var down = getBoardPiece(piece.cx, piece.cy + 1);
+
+		if (left != null && !visited.contains(left)) {
+			visited.push(left);
+			if (left.type == piece.type) {
+				chain.push(left);
+				findConnected(left, chain, visited);
+			}
+		}
+
+		return chain;
+	}
+
+	function getBoardPiece(cx:Int, cy:Int):MatchPiece {
+		if (cx < 0 || cx > board.length || cy < 0 || cy >= board[0].length) {
+			return null;
+		}
+		
+		return board[cx][cy];
+	}
+
 	function checkPairControlDone() {
 		var a = activePair.a;
 		var b = activePair.b;
