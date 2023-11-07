@@ -1,5 +1,6 @@
 package;
 
+import states.OrbitalState;
 import debug.DebugLayers;
 import flixel.system.debug.log.LogStyle;
 import haxe.Timer;
@@ -36,7 +37,7 @@ class Main extends Sprite {
 
 		var startingState:Class<FlxState> = SplashScreenState;
 		#if play
-		startingState = PlayState;
+		startingState = OrbitalState;
 		#elseif credits
 		startingState = CreditsState;
 		#else
@@ -46,7 +47,8 @@ class Main extends Sprite {
 		#end
 		addChild(new FlxGame(0, 0, startingState, 60, 60, true, false));
 
-		FlxG.fixedTimestep = false;
+		// we want deterministic physics, this gets us there easily
+		FlxG.fixedTimestep = true;
 
 		// Disable flixel volume controls as we don't use them because of FMOD
 		FlxG.sound.muteKeys = null;
