@@ -6,6 +6,9 @@ import flixel.math.FlxPoint;
 import flixel.FlxBasic;
 
 class OrbitSystem extends FlxBasic {
+	public var center:FlxPoint;
+	public var radius:Float;
+
 	// static things in the system
 	public var bodies:Array<Body> = [];
 
@@ -15,8 +18,11 @@ class OrbitSystem extends FlxBasic {
 	// G-factor of the gravity calculations
 	public var systemG = 100;
 
-	public function new() {
+	public function new(center:FlxPoint, radius:Float) {
 		super();
+
+		this.center = center;
+		this.radius = radius;
 	}
 
 	var tmp1 = FlxPoint.get();
@@ -25,6 +31,10 @@ class OrbitSystem extends FlxBasic {
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
+
+		#if debug
+		DebugDraw.ME.drawWorldCircle(OrbitalState.ME.systemCam, center.x, center.y, 5, ORBIT);
+		#end
 
 		for (actor in actors) {
 			actor.getMidpoint(tmp1);

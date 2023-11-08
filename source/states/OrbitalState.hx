@@ -1,5 +1,8 @@
 package states;
 
+import input.SimpleController;
+import flixel.math.FlxPoint;
+import orbit.Launcher;
 import orbit.Body;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
@@ -8,11 +11,15 @@ import orbit.OrbitSystem;
 import flixel.FlxG;
 import flixel.FlxState;
 
+using bitdecay.flixel.extensions.FlxPointExt;
+
 class OrbitalState extends FlxState {
 
 	public static var ME:OrbitalState;
 
-	var orbitalSystem:OrbitSystem;
+	var launcher:Launcher;
+
+	public var orbitalSystem:OrbitSystem;
 
 	public var systemCam:FlxCamera;
 
@@ -30,7 +37,7 @@ class OrbitalState extends FlxState {
 		FlxG.cameras.add(systemCam);
 		FlxG.cameras.setDefaultDrawTarget(FlxG.camera, false);
 
-		orbitalSystem = new OrbitSystem();
+		orbitalSystem = new OrbitSystem(FlxPoint.get(systemCam.width/2, systemCam.height/2), 50);
 		add(orbitalSystem);
 
 		var planet = new Body(10, 50, 50);
@@ -41,13 +48,21 @@ class OrbitalState extends FlxState {
 		orbitalSystem.bodies.push(planet2);
 		add(planet2);
 
-		var satellite = new Body(3, 55, 10);
-		satellite.velocity.set(40, 20);
+		launcher = new Launcher();
+		add(launcher);
+	}
+
+	override function update(elapsed:Float) {
+		super.update(elapsed);
+
+		var launchPoint = orbitalSystem.center.pointOnCircumference(launcher.restAngle, orbitalSystem.radius);
+		launcher.setPositionMidpoint(launchPoint.x, launchPoint.y);
+	}
+
+	public function launchSatellite(mid:FlxPoint, angle:Float, velocity:FlxPoint) {
+		var satellite = new Body(3, mid.x, mid.y);
+		satellite.velocity.copyFrom(velocity);
 		orbitalSystem.actors.push(satellite);
 		add(satellite);
-
-		FlxG.watch.add(satellite, "x", "X:");
-		FlxG.watch.add(satellite, "y", "Y:");
-		FlxG.watch.add(satellite, "velocity", "Velocity:");
 	}
 }
