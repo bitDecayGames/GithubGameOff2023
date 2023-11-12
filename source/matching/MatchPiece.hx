@@ -25,13 +25,30 @@ class MatchPiece extends FlxSprite {
 
 	public var type:PieceType;
 
+	var gfxRow = 0;
+
 	public function new(board:MatchBoard) {
 		super();
 
 		parent = board;
 		this.type = PieceType.random();
 
-		makeGraphic(16, 16, type);
+		loadGraphic(AssetPaths.aliens__png, true, 16, 16);
+
+		switch(type) {
+			case A:
+				gfxRow = 0;
+			case B:
+				gfxRow = 1;
+			case C:
+				gfxRow = 2;
+			case D:
+				gfxRow = 3;
+		}
+
+		animation.frameIndex = gfxRow * 17 + 1;
+
+		// makeGraphic(16, 16, type);
 		this.centerOrigin();
 	}
 
