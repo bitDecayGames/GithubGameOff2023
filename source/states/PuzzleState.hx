@@ -1,5 +1,6 @@
 package states;
 
+import flixel.FlxSubState;
 import matching.MatchBoard;
 import entities.Item;
 import flixel.util.FlxColor;
@@ -14,12 +15,13 @@ import bitdecay.flixel.debug.DebugDraw;
 
 using states.FlxStateExt;
 
-class PlayState extends FlxTransitionableState {
+class PuzzleState extends FlxSubState {
 	var board:MatchBoard;
 
 	override public function create() {
 		super.create();
 		Lifecycle.startup.dispatch();
+		bgColor = FlxColor.BLACK;
 
 		FlxG.camera.pixelPerfectRender = true;
 

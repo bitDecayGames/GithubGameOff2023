@@ -1,14 +1,15 @@
 package matching;
 
+import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.tweens.FlxTween;
-import matching.Chain.ChainNode;
+import matching.ChainNode;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
 import bitdecay.flixel.debug.DebugDraw;
 import input.SimpleController;
 import flixel.FlxSprite;
 
-class MatchBoard extends FlxSprite {
+class MatchBoard extends FlxTypedGroup<FlxSprite> {
 	private static var FAST_FALL_MOD = 10.0;
 
 	private static var MOVE_REPEAT_INTERVAL = 0.25;
@@ -43,8 +44,8 @@ class MatchBoard extends FlxSprite {
 
 	public function sendPiece() {
 		activePair = new MatchPair(new MatchPiece(this), new MatchPiece(this), FlxPoint.get(3, 0));
-		FlxG.state.add(activePair.a);
-		FlxG.state.add(activePair.b);
+		add(activePair.a);
+		add(activePair.b);
 	}
 
 	override function update(elapsed:Float) {
@@ -146,6 +147,7 @@ class MatchBoard extends FlxSprite {
 		// TODO: need to do animations / wait for animation to finish before continuing game
 		var first = true;
 		chain.forEachNode((piece) -> {
+			// TODO: We need to visit neighbors of the node to 'break' any armor / interact with special pieces
 			FlxTween.tween(piece, {alpha: 0}, {
 				onComplete: (t) -> {
 					board[piece.cx][piece.cy] = null;

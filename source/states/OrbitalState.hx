@@ -34,21 +34,25 @@ class OrbitalState extends FlxState {
 
 		systemCam = new FlxCamera(50, 50, 300, 300);
 		systemCam.bgColor = FlxColor.PURPLE.getDarkened(0.8);
-		FlxG.cameras.add(systemCam);
-		FlxG.cameras.setDefaultDrawTarget(FlxG.camera, false);
+		FlxG.cameras.add(systemCam, false);
+		// FlxG.cameras.setDefaultDrawTarget(FlxG.camera, false);
 
 		orbitalSystem = new OrbitSystem(FlxPoint.get(systemCam.width/2, systemCam.height/2), 50);
+		orbitalSystem.orbitCb = handleOrbit;
 		add(orbitalSystem);
 
 		var planet = new Body(10, 50, 50);
 		orbitalSystem.bodies.push(planet);
+		planet.camera = systemCam;
 		add(planet);
 
 		var planet2 = new Body(20, 150, 125);
 		orbitalSystem.bodies.push(planet2);
+		planet2.camera = systemCam;
 		add(planet2);
 
 		launcher = new Launcher();
+		launcher.camera = systemCam;
 		add(launcher);
 	}
 
@@ -64,5 +68,12 @@ class OrbitalState extends FlxState {
 		satellite.velocity.copyFrom(velocity);
 		orbitalSystem.actors.push(satellite);
 		add(satellite);
+	}
+
+	function handleOrbit(actor:Body, planet:Body) {
+		// trace('orbit being handle');
+		systemCam.visible = false;
+		openSubState(new PuzzleState());
+		subStateClosed.addOnce((sub) -> {systemCam.visible = true;});
 	}
 }

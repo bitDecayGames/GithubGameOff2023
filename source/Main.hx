@@ -21,7 +21,7 @@ import misc.FlxTextFactory;
 import openfl.display.Sprite;
 import bitdecay.flixel.debug.DebugDraw;
 #if play
-import states.PlayState;
+import states.PuzzleState;
 #end
 #if credits
 import states.CreditsState;

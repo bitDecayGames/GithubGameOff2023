@@ -4,7 +4,7 @@ import flixel.math.FlxMath;
 import bitdecay.flixel.debug.DebugDraw;
 import flixel.math.FlxPoint;
 import states.OrbitalState;
-import states.PlayState;
+import states.PuzzleState;
 import input.SimpleController;
 import flixel.util.FlxColor;
 import flixel.FlxSprite;

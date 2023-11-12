@@ -18,6 +18,8 @@ class OrbitSystem extends FlxBasic {
 	// G-factor of the gravity calculations
 	public var systemG = 100;
 
+	public var orbitCb:(Body, Body)->Void = null;
+
 	public function new(center:FlxPoint, radius:Float) {
 		super();
 
@@ -47,6 +49,15 @@ class OrbitSystem extends FlxBasic {
 				tmp3.addPoint(tmp2);
 				tmp2.scale(elapsed);
 				actor.velocity.addPoint(tmp2);
+
+				actor.getMidpoint(tmp2);
+				body.getMidpoint(tmp3);
+				// TODO: Actually have to handle what our orbital radius should be and how we know if we hit it or not
+				if (tmp2.distanceTo(tmp3) < actor.radius + body.radius + 10) {
+					if (orbitCb != null) {
+						orbitCb(actor, body);
+					}
+				}
 			}
 
 			#if debug

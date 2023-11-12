@@ -6,12 +6,15 @@ import flixel.FlxSprite;
 class Body extends FlxSprite {
 	public var weight:Float = 1.0;
 
+	public var radius:Float;
+
 	// var dt = 0.0;
 
 	// var savedLast:FlxPoint = FlxPoint.get();
 
 	public function new(size:Float, x:Float, y:Float) {
 		super(x, y);
+		radius = size;
 
 		makeGraphic(Std.int(size), Std.int(size));
 
