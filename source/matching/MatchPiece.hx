@@ -27,6 +27,8 @@ class MatchPiece extends FlxSprite {
 
 	var gfxRow = 0;
 
+	static var popFrames = [16, 17, 18, 19];
+
 	public function new(board:MatchBoard) {
 		super();
 
@@ -46,9 +48,13 @@ class MatchPiece extends FlxSprite {
 				gfxRow = 3;
 		}
 
-		animation.frameIndex = gfxRow * 17 + 1;
+		var baseFrame = gfxRow * 20;
 
-		// makeGraphic(16, 16, type);
+		animation.add('idle', [baseFrame + 1]);
+		animation.add('pop', [for (i in popFrames) baseFrame + i], false);
+
+		animation.play('idle');
+
 		this.centerOrigin();
 	}
 

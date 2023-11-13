@@ -49,8 +49,6 @@ class MatchBoard extends FlxTypedGroup<FlxSprite> {
 	}
 
 	override function update(elapsed:Float) {
-		super.update(elapsed);
-
 		DebugDraw.ME.drawWorldRect(0, 0, boardWidth * CELL_SIZE, boardHeight * CELL_SIZE);
 
 		if (activePair != null) {
@@ -119,6 +117,8 @@ class MatchBoard extends FlxTypedGroup<FlxSprite> {
 			sendPiece();
 		}
 
+		super.update(elapsed);
+
 		checkSettled();
 
 		#if debug
@@ -147,6 +147,7 @@ class MatchBoard extends FlxTypedGroup<FlxSprite> {
 		// TODO: need to do animations / wait for animation to finish before continuing game
 		var first = true;
 		chain.forEachNode((piece) -> {
+			piece.animation.play('pop');
 			// TODO: We need to visit neighbors of the node to 'break' any armor / interact with special pieces
 			FlxTween.tween(piece, {alpha: 0}, {
 				onComplete: (t) -> {
