@@ -39,7 +39,8 @@ class OrbitalState extends FlxState {
 
 		orbitShader = new ExampleShader();
 
-		systemCam = new FlxCamera(50, 50, 300, 300);
+		// systemCam = new FlxCamera(50, 50, 300, 300);
+		systemCam = new FlxCamera();
 		systemCam.bgColor = FlxColor.PURPLE.getDarkened(0.8);
 		FlxG.cameras.add(systemCam, false);
 		systemCam.filters = [new ShaderFilter(orbitShader)];
@@ -54,8 +55,6 @@ class OrbitalState extends FlxState {
 		planet.camera = systemCam;
 		add(planet);
 
-		orbitShader.planets = [planet];
-
 		var planet2 = new Body(20, 150, 125);
 		orbitalSystem.bodies.push(planet2);
 		planet2.camera = systemCam;
@@ -69,6 +68,7 @@ class OrbitalState extends FlxState {
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
+		orbitShader.planets = orbitalSystem.bodies;
 		orbitShader.update(elapsed);
 
 		var launchPoint = orbitalSystem.center.pointOnCircumference(launcher.restAngle, orbitalSystem.radius);
